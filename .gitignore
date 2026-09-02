@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.py[cod]
+.env
+ifct2017_app.sqlite
+images/*.jpg
+images/*.jpeg
+images/*.png
+.DS_Store
