@@ -2,15 +2,10 @@
 
 Python utility for downloading ingredient images from multiple image providers using ingredient data stored in SQLite.
 
-## What it does
+## Supported providers
 
-- Reads `id` and `name` from the `ingredients` table.
-- Supports **Pexels** and **Wikimedia Commons** providers.
-- Lets you choose the provider from the command line.
-- Downloads the selected image locally as `<ingredient_id>.jpg`.
-- Keeps each provider's images in its own directory so results can be compared safely.
-- Skips existing images unless `--force` is used.
-- Includes a local Flask viewer for searching by ingredient name or ID.
+- `wikimedia` — default; uses Wikimedia Commons and requires no API key.
+- `pexels` — requires a Pexels API key.
 
 ## Setup
 
@@ -20,70 +15,62 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Copy `.env.example` to `.env` and add your Pexels API key if you want to use Pexels:
+Copy `.env.example` to `.env` and configure the provider:
 
 ```text
+DEFAULT_PROVIDER=wikimedia
 PEXELS_API_KEY=your_pexels_api_key_here
 DATABASE_PATH=ifct2017_app.sqlite
 IMAGE_DIR=images
 ```
 
-Wikimedia Commons does not require an API key for the implemented search provider.
+`DEFAULT_PROVIDER` accepts `wikimedia` or `pexels`. If it is omitted, the application defaults to `wikimedia`.
 
 The SQLite database is intentionally ignored by Git. Keep your local `ifct2017_app.sqlite` in the project root.
 
-## Providers
+## Download images
 
-### Pexels
-
-```bash
-python -m app.fetch_images --provider pexels --limit 10
-```
-
-### Wikimedia Commons
-
-```bash
-python -m app.fetch_images --provider wikimedia --limit 10
-```
-
-If `--provider` is omitted, Pexels is used for backwards compatibility:
+The configured provider is used by default:
 
 ```bash
 python -m app.fetch_images --limit 10
 ```
 
-Process all ingredients with Wikimedia:
+You can temporarily override the configured provider from the command line:
 
 ```bash
-python -m app.fetch_images --provider wikimedia
+python -m app.fetch_images --provider wikimedia --limit 10
+python -m app.fetch_images --provider pexels --limit 10
 ```
 
-Replace existing images for a provider:
+Process all ingredients:
 
 ```bash
-python -m app.fetch_images --provider wikimedia --force
+python -m app.fetch_images
+```
+
+Use `--force` to replace existing images for the selected provider:
+
+```bash
+python -m app.fetch_images --force
 ```
 
 Other options:
 
 ```bash
-python -m app.fetch_images --provider wikimedia --start-id 100 --limit 50
-python -m app.fetch_images --provider pexels --force --delay 0.5
+python -m app.fetch_images --start-id 100 --limit 50
+python -m app.fetch_images --force --delay 0.5
 ```
 
-Images are stored separately:
+Images are stored separately by provider:
 
 ```text
 images/
-├── pexels/
-│   ├── 1.jpg
-│   └── 2.jpg
-└── wikimedia/
-    ├── 1.jpg
-    └── 2.jpg
+├── wikimedia/
+│   └── <ingredient_id>.jpg
+└── pexels/
+    └── <ingredient_id>.jpg
 ```
-
-This allows you to compare providers without overwriting the existing Pexels set.
 
 ## Run the image viewer
 
@@ -100,12 +87,12 @@ app/
 ├── __init__.py
 ├── config.py
 ├── db.py
-├── pexels.py
-├── wikimedia.py
-├── providers.py
 ├── downloader.py
 ├── fetch_images.py
-└── viewer.py
+├── pexels.py
+├── providers.py
+├── viewer.py
+└── wikimedia.py
 requirements.txt
 .env.example
 .gitignore
@@ -114,4 +101,4 @@ README.md
 
 ## Important
 
-Do not commit `.env`, your Pexels API key, the SQLite database, or downloaded image files. Review the licensing and attribution requirements for each provider before publishing downloaded assets in a commercial app. Wikimedia Commons images can have different licenses and attribution requirements per file.
+Do not commit `.env`, your Pexels API key, the SQLite database, or downloaded image files. Review each provider's licensing and attribution requirements before publishing downloaded assets in a commercial app. Wikimedia Commons images can have different licenses and attribution requirements per file.
