@@ -2,10 +2,11 @@ import argparse
 import time
 from pathlib import Path
 
-from .config import IMAGE_DIR
+from .config import DEFAULT_PROVIDER
 from .db import get_ingredients
 from .downloader import download_image
 from .providers import get_provider, PROVIDERS
+from .config import IMAGE_DIR
 
 
 def parse_args():
@@ -15,8 +16,8 @@ def parse_args():
     parser.add_argument(
         "--provider",
         choices=sorted(PROVIDERS),
-        default="pexels",
-        help="Image provider to use (default: pexels).",
+        default=None,
+        help=f"Image provider (default: {DEFAULT_PROVIDER}).",
     )
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--start-id", type=int, default=None)
@@ -27,7 +28,8 @@ def parse_args():
 
 def main():
     args = parse_args()
-    search_image, get_image_url = get_provider(args.provider)
+    provider = args.provider or DEFAULT_PROVIDER
+    search_image, get_image_url = get_provider(provider)
     ingredients = get_ingredients()
 
     if args.start_id is not None:
@@ -38,11 +40,11 @@ def main():
         ingredients = ingredients[: args.limit]
 
     total = len(ingredients)
-    provider_dir = Path(IMAGE_DIR) / args.provider
+    provider_dir = Path(IMAGE_DIR) / provider
     provider_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"Processing {total} ingredients...")
-    print(f"Provider: {args.provider}")
+    print(f"Provider: {provider}")
     print(f"Images directory: {provider_dir}")
 
     success = skipped = failed = 0
@@ -61,7 +63,7 @@ def main():
         try:
             result = search_image(name)
             if not result:
-                print(f"  -> no {args.provider} result")
+                print(f"  -> no {provider} result")
                 failed += 1
                 continue
 
