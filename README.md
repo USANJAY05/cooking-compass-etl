@@ -1,15 +1,14 @@
 # Ingredient Image Fetcher
 
-Python utility for downloading ingredient images from Pexels using ingredient data stored in SQLite.
+Python utility for downloading ingredient images from multiple image providers using ingredient data stored in SQLite.
 
 ## What it does
 
 - Reads `id` and `name` from the `ingredients` table.
-- Builds culinary-specific Pexels queries for raw/fresh ingredients.
-- Uses curated aliases for ambiguous ingredients such as drumstick, drumstick leaf, chilli, coriander, and curry leaf.
-- Fetches multiple candidates instead of blindly taking the first Pexels result.
-- Scores candidates to prefer ingredient-relevant, clean, square-friendly photos and penalize dishes, people, packaging, logos, and other unwanted content.
+- Supports **Pexels** and **Wikimedia Commons** providers.
+- Lets you choose the provider from the command line.
 - Downloads the selected image locally as `<ingredient_id>.jpg`.
+- Keeps each provider's images in its own directory so results can be compared safely.
 - Skips existing images unless `--force` is used.
 - Includes a local Flask viewer for searching by ingredient name or ID.
 
@@ -21,7 +20,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Copy `.env.example` to `.env` and add your Pexels API key:
+Copy `.env.example` to `.env` and add your Pexels API key if you want to use Pexels:
 
 ```text
 PEXELS_API_KEY=your_pexels_api_key_here
@@ -29,46 +28,62 @@ DATABASE_PATH=ifct2017_app.sqlite
 IMAGE_DIR=images
 ```
 
+Wikimedia Commons does not require an API key for the implemented search provider.
+
 The SQLite database is intentionally ignored by Git. Keep your local `ifct2017_app.sqlite` in the project root.
 
-## Download images
+## Providers
 
-Test with 10 ingredients first:
+### Pexels
+
+```bash
+python -m app.fetch_images --provider pexels --limit 10
+```
+
+### Wikimedia Commons
+
+```bash
+python -m app.fetch_images --provider wikimedia --limit 10
+```
+
+If `--provider` is omitted, Pexels is used for backwards compatibility:
 
 ```bash
 python -m app.fetch_images --limit 10
 ```
 
-Process all ingredients:
+Process all ingredients with Wikimedia:
 
 ```bash
-python -m app.fetch_images
+python -m app.fetch_images --provider wikimedia
 ```
 
-If you already downloaded images with an older version and want to replace them with the improved culinary selection, use:
+Replace existing images for a provider:
 
 ```bash
-python -m app.fetch_images --force
+python -m app.fetch_images --provider wikimedia --force
 ```
 
 Other options:
 
 ```bash
-python -m app.fetch_images --start-id 100 --limit 50
-python -m app.fetch_images --force --delay 0.5
+python -m app.fetch_images --provider wikimedia --start-id 100 --limit 50
+python -m app.fetch_images --provider pexels --force --delay 0.5
 ```
 
-Images are saved as:
+Images are stored separately:
 
 ```text
-images/<ingredient_id>.jpg
+images/
+├── pexels/
+│   ├── 1.jpg
+│   └── 2.jpg
+└── wikimedia/
+    ├── 1.jpg
+    └── 2.jpg
 ```
 
-## Image selection strategy
-
-The fetcher uses a culinary-oriented search query and evaluates up to 40 Pexels results. It prefers images that match the ingredient name, have a suitable resolution, and have a square-friendly composition. It penalizes results whose metadata suggests prepared dishes, people, hands, packaging, logos, or restaurant content.
-
-Known ambiguous terms have explicit query overrides in `app/pexels.py`. Add more overrides there when an ingredient needs a more specific culinary search term.
+This allows you to compare providers without overwriting the existing Pexels set.
 
 ## Run the image viewer
 
@@ -86,6 +101,8 @@ app/
 ├── config.py
 ├── db.py
 ├── pexels.py
+├── wikimedia.py
+├── providers.py
 ├── downloader.py
 ├── fetch_images.py
 └── viewer.py
@@ -97,4 +114,4 @@ README.md
 
 ## Important
 
-Do not commit `.env`, your Pexels API key, the SQLite database, or downloaded image files. Review Pexels licensing/API requirements for your intended commercial distribution before publishing the downloaded assets.
+Do not commit `.env`, your Pexels API key, the SQLite database, or downloaded image files. Review the licensing and attribution requirements for each provider before publishing downloaded assets in a commercial app. Wikimedia Commons images can have different licenses and attribution requirements per file.
