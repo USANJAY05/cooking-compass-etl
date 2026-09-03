@@ -11,10 +11,8 @@ IMAGE_DIR = Path(os.getenv("IMAGE_DIR", str(BASE_DIR / "images")))
 DEFAULT_PROVIDER = os.getenv("DEFAULT_PROVIDER", "wikimedia").strip().lower()
 PEXELS_API_KEY = os.getenv("PEXELS_API_KEY", "").strip()
 PEXELS_SEARCH_URL = "https://api.pexels.com/v1/search"
-GOOGLE_SEARCH_API_KEY = os.getenv("GOOGLE_SEARCH_API_KEY", "").strip()
-GOOGLE_CSE_ID = os.getenv("GOOGLE_CSE_ID", "").strip()
 
-SUPPORTED_PROVIDERS = {"wikimedia", "pexels", "google"}
+SUPPORTED_PROVIDERS = {"wikimedia", "pexels"}
 
 if DEFAULT_PROVIDER not in SUPPORTED_PROVIDERS:
     raise ValueError(
