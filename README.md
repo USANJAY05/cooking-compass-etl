@@ -6,6 +6,7 @@ Python utility for downloading ingredient images from multiple image providers u
 
 - `wikimedia` — default; uses Wikimedia Commons and requires no API key.
 - `pexels` — requires a Pexels API key.
+- `google` — uses Google Custom Search image search and requires a Google API key and Custom Search Engine ID. Availability depends on Google's current API access for the account/project.
 
 ## Setup
 
@@ -20,11 +21,13 @@ Copy `.env.example` to `.env` and configure the provider:
 ```text
 DEFAULT_PROVIDER=wikimedia
 PEXELS_API_KEY=your_pexels_api_key_here
+GOOGLE_SEARCH_API_KEY=your_google_api_key_here
+GOOGLE_CSE_ID=your_custom_search_engine_id_here
 DATABASE_PATH=ifct2017_app.sqlite
 IMAGE_DIR=images
 ```
 
-`DEFAULT_PROVIDER` accepts `wikimedia` or `pexels`. If it is omitted, the application defaults to `wikimedia`.
+`DEFAULT_PROVIDER` accepts `wikimedia`, `pexels`, or `google`. If it is omitted, the application defaults to `wikimedia`.
 
 The SQLite database is intentionally ignored by Git. Keep your local `ifct2017_app.sqlite` in the project root.
 
@@ -41,6 +44,7 @@ You can temporarily override the configured provider from the command line:
 ```bash
 python -m app.fetch_images --provider wikimedia --limit 10
 python -m app.fetch_images --provider pexels --limit 10
+python -m app.fetch_images --provider google --limit 10
 ```
 
 Process all ingredients:
@@ -68,7 +72,9 @@ Images are stored separately by provider:
 images/
 ├── wikimedia/
 │   └── <ingredient_id>.jpg
-└── pexels/
+├── pexels/
+│   └── <ingredient_id>.jpg
+└── google/
     └── <ingredient_id>.jpg
 ```
 
@@ -89,6 +95,7 @@ app/
 ├── db.py
 ├── downloader.py
 ├── fetch_images.py
+├── google_images.py
 ├── pexels.py
 ├── providers.py
 ├── viewer.py
@@ -101,6 +108,6 @@ README.md
 
 ## Important
 
-Do not commit `.env`, your Pexels API key, the SQLite database, or downloaded image files. Review each provider's licensing and attribution requirements before publishing downloaded assets in a commercial app. Wikimedia Commons images can have different licenses and attribution requirements per file.
+Do not commit `.env`, your API keys, the SQLite database, or downloaded image files. Review each provider's licensing and attribution requirements before publishing downloaded assets in a commercial app. Wikimedia Commons images can have different licenses and attribution requirements per file.
 
-Google Custom Search was previously implemented as a provider but has been removed because the Custom Search JSON API is no longer available to new customers.
+Google image results come from third-party websites, so the source site's image license must be reviewed before using downloaded assets in the app.
