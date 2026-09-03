@@ -102,3 +102,5 @@ README.md
 ## Important
 
 Do not commit `.env`, your Pexels API key, the SQLite database, or downloaded image files. Review each provider's licensing and attribution requirements before publishing downloaded assets in a commercial app. Wikimedia Commons images can have different licenses and attribution requirements per file.
+
+Google Custom Search was previously implemented as a provider but has been removed because the Custom Search JSON API is no longer available to new customers.
